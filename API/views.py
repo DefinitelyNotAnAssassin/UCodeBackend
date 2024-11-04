@@ -385,6 +385,8 @@ def activities(request, activity_code):
 
     return JsonResponse(data, safe=False)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def check_eligibility(request, pk):
     course = Course.objects.get(pk=pk)
     user = request.user
