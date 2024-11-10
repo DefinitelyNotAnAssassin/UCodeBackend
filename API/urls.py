@@ -24,4 +24,7 @@ urlpatterns = [
     path("refreshToken", views.refresh_token, name="refresh_token"),    
     path("activities/<str:activity_code>", views.activities, name="activities"),
     path("checkEligibity/<int:pk>", views.check_eligibility, name="check_eligibility"),
+    path("getPlayerProfile", views.get_player_profile, name="get_player_profile"),
+    path("updatePlayerProfile", views.update_player_profile, name="update_player_profile"),
+    path("getLeaderboard", views.get_leaderboard, name="get_leaderboard"),
 ]

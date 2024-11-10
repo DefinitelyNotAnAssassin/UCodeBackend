@@ -140,3 +140,84 @@ class Submission(models.Model):
 
     def get_score(self):
         return 1.0 if self.is_correct() else 0.0
+    
+    
+    
+class Game(models.Model):
+    """
+    Game model to store different types of educational games.
+    """
+    GAME_TYPES = [
+        ('multipleChoice', 'Multiple Choice'),
+        ('sortableCode', 'Sortable Code'),
+        ('tagMatcher', 'Tag Matcher'),
+    ]
+
+    DIFFICULTY_LEVELS = [
+        ('easy', 'Easy'),
+        ('medium', 'Medium'),
+        ('hard', 'Hard'),
+    ]
+
+    title = models.CharField(max_length=255)
+    type = models.CharField(max_length=50, choices=GAME_TYPES)
+    difficulty = models.CharField(max_length=50, choices=DIFFICULTY_LEVELS)
+    questions = JSONField(null=True, blank=True)
+    code_blocks = JSONField(null=True, blank=True)
+    tags = JSONField(null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+    
+    
+class PlayerProfile(models.Model):
+    """
+    PlayerProfile model to store the player's profile information
+    """
+    user = models.OneToOneField(Account, related_name='profile', on_delete=models.CASCADE)
+    level = models.CharField(max_length=50, default='Beginner')
+    experience_points = models.IntegerField(default=0)
+    games_played = models.ManyToManyField(Game, related_name='players', blank=True)
+    lives = models.IntegerField(default=3)  
+    points = models.IntegerField(default=0) 
+
+    def __str__(self):
+        return self.user.username
+
+    def update_experience_points(self, points):
+        self.experience_points += points
+        if self.experience_points < 0:
+            self.experience_points = 0
+        self.save()
+        return self.experience_points
+
+    def update_level(self):
+        if self.experience_points < 100:
+            self.level = 'Beginner'
+        elif self.experience_points < 200:
+            self.level = 'Intermediate'
+        else:
+            self.level = 'Advanced'
+        self.save()
+        return self.level
+
+    def add_game(self, game):
+        self.games_played.add(game)
+        self.save()
+        
+    def remove_life(self):
+        self.lives -= 1
+        self.save()
+        return self.lives
+    
+    def add_life(self):
+        self.lives += 1
+        self.save()
+        return self.lives
+    
+    # a function to generate life every 30 minutes 
+    def generate_life(self):
+        self.lives += 1
+        self.save()
+        return self.lives
+

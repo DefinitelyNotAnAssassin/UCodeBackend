@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login as login_user
-from Models.models import Account, Category, Course, Topic, Subtopic, Example, Submission, Activity
+from Models.models import Account, Category, Course, Topic, Subtopic, Example, Submission, Activity, Game, PlayerProfile
 from django.db.utils import IntegrityError
 from rest_framework_simplejwt.tokens import RefreshToken
 import json
@@ -118,6 +118,7 @@ def submit_activity(request):
     submission.save()
     
     return JsonResponse({"message": "Submitted Successfully"}, safe=False)
+
 @csrf_exempt  
 @api_view(['POST'])
 def login(request): 
@@ -143,8 +144,6 @@ def login(request):
         return JsonResponse({"refresh": str(refresh), "access": str(refresh.access_token), "user": user}, safe=False)
     else:
         return JsonResponse({"error": "Invalid credentials"}, status=400)
-
-
 
 @csrf_exempt
 def categories(request):
@@ -392,3 +391,35 @@ def check_eligibility(request, pk):
     user = request.user
 
     return JsonResponse({"isEligible": course.is_completed_by_user(user)}, safe=False)
+
+@api_view(['GET'])  
+@permission_classes([IsAuthenticated])
+def get_player_profile(request):
+    user = request.user
+    profile, created = PlayerProfile.objects.get_or_create(user=user)
+    data = { 
+        "points": profile.points
+    }
+    return JsonResponse(data, safe=False)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def update_player_profile(request):
+    user = request.user
+    profile, created = PlayerProfile.objects.get_or_create(user=user)
+    data = json.loads(request.body)
+    profile.points = data["points"]
+    profile.save()
+    return JsonResponse({"message": "Profile updated successfully"}, safe=False)
+
+def get_leaderboard(request):
+    profiles = PlayerProfile.objects.all().order_by('-points')
+    data = [] 
+    for profile in profiles:
+        data.append({ 
+            "user": profile.user.first_name + " " + profile.user.last_name + (" (" + profile.user.username + ")" if profile.user.username else ""), 
+            "points": profile.points
+                     })
+    return JsonResponse(data, safe=False)
