@@ -423,3 +423,50 @@ def get_leaderboard(request):
             "points": profile.points
                      })
     return JsonResponse(data, safe=False)
+
+
+
+@api_view(['GET'])   
+@permission_classes([IsAuthenticated])
+def get_courses(request): 
+    courses = Course.objects.all()
+    data = []
+    for course in courses:
+        course_data = {
+            "id": course.id,
+            "title": course.title,
+            "category": course.category.name,
+            "duration": course.duration,
+            "level": course.level,
+            "topics": []
+        }
+        for topic in course.topics.all():
+            topic_data = {
+                "id": topic.id,
+                "name": topic.name,
+                "subtopics": []
+            }
+            for subtopic in topic.subtopics.all():
+                subtopic_data = {
+                    "id": subtopic.id,
+                    "name": subtopic.name,
+                    "activities": []
+                }
+                for activity in subtopic.activities.all():
+                    activity_data = {
+                        "id": activity.id,
+                        "activity_code": activity.activity_code,
+                        "time_limit": activity.time_limit,
+                        "quiz_type": activity.quiz_type,
+             
+                        "max_score": activity.max_score,
+                        "questions": activity.questions
+                    }
+                    subtopic_data["activities"].append(activity_data)
+                topic_data["subtopics"].append(subtopic_data)
+            course_data["topics"].append(topic_data)
+        data.append(course_data)
+
+    return JsonResponse(data, safe=False)
+
+

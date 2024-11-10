@@ -27,4 +27,5 @@ urlpatterns = [
     path("getPlayerProfile", views.get_player_profile, name="get_player_profile"),
     path("updatePlayerProfile", views.update_player_profile, name="update_player_profile"),
     path("getLeaderboard", views.get_leaderboard, name="get_leaderboard"),
+    path("getCourses", views.get_courses, name="get_courses"),  
 ]
