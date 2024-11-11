@@ -470,3 +470,38 @@ def get_courses(request):
     return JsonResponse(data, safe=False)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_course(request):
+    data = json.loads(request.body)
+    
+    newCourse, _ = Course.objects.update_or_create(
+        title=data['title'],
+        category=Category.objects.get(name=data['category']),
+        duration=data['duration'],
+        level=data['level'],
+        defaults={
+            'title': data['title'],
+            'category': Category.objects.get(name=data['category']),
+            'duration': data['duration'],
+            'level': data['level']
+        }
+    )
+    
+    for topic_data in data['topics']:
+        newTopic = Topic.objects.create(course=newCourse, name=topic_data['name'])
+        
+        for subtopic_data in topic_data['subtopics']:
+            newSubtopic = Subtopic.objects.create(topic=newTopic, name=subtopic_data['name'])
+            
+            for activity_data in subtopic_data['activities']:
+                Activity.objects.create(
+                    subtopic=newSubtopic,
+                    activity_code=activity_data['activity_code'],
+                    time_limit=activity_data['time_limit'],
+                    quiz_type=activity_data['quiz_type'],
+                    max_score=activity_data['max_score'],
+                    questions=activity_data['questions']
+                )
+    
+    return JsonResponse({"message": "Course created successfully"}, safe=False)

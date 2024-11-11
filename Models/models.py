@@ -63,6 +63,8 @@ class Course(models.Model):
             for activity in activities:
                 if not Submission.objects.filter(student=user, activity=activity).exists():
                     return False
+                
+                
         return True
 
 class Topic(models.Model):
