@@ -84,6 +84,7 @@ class Subtopic(models.Model):
 
 
 class Example(models.Model):
+    name = models.CharField(max_length=100, blank = True, null = True)
     subtopic = models.ForeignKey(Subtopic, related_name='examples', on_delete=models.CASCADE)
     description = models.TextField()
     code = models.TextField()

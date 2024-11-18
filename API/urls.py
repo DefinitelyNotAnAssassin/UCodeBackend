@@ -29,4 +29,5 @@ urlpatterns = [
     path("getLeaderboard", views.get_leaderboard, name="get_leaderboard"),
     path("getCourses", views.get_courses, name="get_courses"),  
     path("createCourse", views.create_course, name="create_course"),
+    path("create", views.create, name="create"),
 ]

@@ -240,6 +240,7 @@ def course_detail(request, pk):
                     "examples": [
                     {
                         "id": example.id,
+                        "name": example.name,
                         "description": example.description,
                         "code": example.code
                     }
@@ -505,3 +506,51 @@ def create_course(request):
                 )
     
     return JsonResponse({"message": "Course created successfully"}, safe=False)
+
+
+
+@api_view(['POST'])
+def create(request): 
+    data = request.POST 
+    data = data.get('data')  
+    data = json.loads(data)  
+    print(data)
+    
+    for course_data in data['courses']:
+        category, _ = Category.objects.get_or_create(name=course_data['category'])
+        course = Course.objects.create(
+            title=course_data['title'],
+            category=category,
+            duration=course_data['duration'],
+            level=course_data['level']
+        )
+        for topic_data in course_data['topics']:
+            topic = Topic.objects.create(
+                name=topic_data['name'],
+                course=course
+            )
+            for subtopic_data in topic_data['subtopics']:
+                subtopic = Subtopic.objects.create(
+                    name=subtopic_data['name'],
+                    topic=topic
+                )
+                for example_data in subtopic_data['examples']:
+                    Example.objects.create(
+                        subtopic=subtopic,
+                        name = example_data['name'],
+                        description=example_data['description'],
+                        code=example_data['code']
+                    )
+                
+                
+                for activity_data in subtopic_data['activities']:
+                    Activity.objects.create(
+                        activity_code=activity_data['activity_code'],
+                        subtopic=subtopic,
+                        time_limit=activity_data['time_limit'],
+                        quiz_type=activity_data['quiz_type'],
+                        max_score=activity_data['max_score'],
+                        questions=activity_data['questions']
+                    )
+    
+    return JsonResponse({"message": "Welcome to the API!"}, safe=False)
