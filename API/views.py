@@ -539,7 +539,7 @@ def create(request):
                         subtopic=subtopic,
                         name = example_data['name'],
                         description=example_data['description'],
-                        code=example_data['code']
+                        code=example_data.get('code', '')
                     )
                 
                 
